@@ -26,7 +26,7 @@ docker run --name some-mysql --network some-network -e MYSQL_ROOT_PASSWORD=my-se
 ### Faxocr コンテナ起動
 以下のコマンドは Faxocr がインストールされたコンテナの起動となります。Web Application や Cron は起動しません。
 ```
-docker run -ti --network some-network -p 3000:3000 -e MYSQL_ROOT_PASSWORD=my-secret-pw -e MYSQL_HOST=some-mysql kekekekenta/faxocr
+docker run -ti --network some-network -p 3000:3000 -e MYSQL_ROOT_PASSWORD=my-secret-pw -e MYSQL_HOST=some-mysql -e SERVER_TYPE=docker -e POP3HOST=outlook.office365.com -e POP3PORT=995 -e POP3USER=xxxxxxxx@outlook.com -e POP3PASSWORD=xxxxx -e POP3SSL=true -e FAXSENDTYPE=messageplus -e SMTPHOST=smtp.office365.com -e SMTPPORT=587 -e SMTPAUTH=true -e SMTPUSER=xxxxxxxx@outlook.com -e SMTPPASSWORD=xxxxx -e SMTPSSL=true -e SMTPFROM=xxxxxxxx@outlook.com -e FAXTODOMAIN=mailfax.everynet.jp -e FAXFROMADDR=xxxxxxxx@outlook.com -e FAXUSER= -e FAXPASS= kekekekenta/faxocr
 ```
 Ruby on Railsの Web Application を起動する場合、以下のコマンドで実行してください。実行したら Docker をホストするデスクトップのブラウザで、 http://localhost:3000/faxocr/ にアクセスしてください。初期管理者は admin、初期パスワードは admin です。
 ```
