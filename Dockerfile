@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM nvidia/cuda:10.2-cudnn7-devel-ubuntu16.04
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
