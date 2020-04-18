@@ -13,10 +13,10 @@ RUN apt-get update && apt-get install -y \
     nodejs
 RUN apt-get install -y --no-install-recommends \
     libopencv-dev
-RUN apt-get install -y --no-install-recommends \
-    php php-mbstring php-mysql \
+RUN apt-get install -y \
+    php php-mbstring php-mysql --no-install-recommends \
     imagemagick wkhtmltopdf gocr netpbm fetchmail sendemail pdftk zip mpack xvfb procmail \
-    parallel fonts-takao-gothic fonts-takao-mincho
+    parallel fonts-takao-gothic fonts-takao-mincho ghostscript
 COPY imagemagick_policy.xml /etc/ImageMagick-6/policy.xml
 # ruby
 ENV RUBY_DIR=/root/.rbenv
@@ -31,7 +31,7 @@ RUN echo "install: --no-ri --no-rdoc" > /root/.gemrc \
 ENV PATH=$RUBY_DIR/versions/$RUBY_VERSION/bin:$PATH
 RUN $RUBY_DIR/versions/$RUBY_VERSION/bin/gem install bundler -v 1.11.2
 # faxocr
-RUN echo faxocr
+RUN echo faxocr1
 RUN useradd -d /home/faxocr faxocr
 RUN git clone -b kentaro/ruby19rails23mysql56 https://github.com/KentaroAOKI/faxocr.git /home/faxocr
 RUN cd /home/faxocr/rails && $RUBY_DIR/versions/$RUBY_VERSION/bin/bundle install
@@ -66,8 +66,10 @@ RUN apt-get install -y apache2 apache2-dev --no-install-recommends
 RUN $RUBY_DIR/versions/$RUBY_VERSION/bin/gem install passenger
 RUN $RUBY_DIR/versions/$RUBY_VERSION/bin/passenger-install-apache2-module --auto
 RUN $RUBY_DIR/versions/$RUBY_VERSION/bin/passenger-install-apache2-module --snippet > /etc/apache2/mods-available/passenger.load
-COPY apache2_site-faxocr.conf /etc/apache2/sites-available/faxocr.conf
-COPY apache2_ports.conf /etc/apache2/ports.conf
+COPY apache2_site-faxocr.conf /tmp/faxocr.conf
+RUN tr -d '\r' < /tmp/faxocr.conf > /etc/apache2/sites-available/faxocr.conf
+COPY apache2_ports.conf /tmp/ports.conf
+RUN tr -d '\r' < /tmp/ports.conf > /etc/apache2/ports.conf
 RUN a2dissite 000-default && a2ensite faxocr && a2enmod passenger
 RUN chown -R faxocr:faxocr /home/faxocr
 ENV APACHE_RUN_USER root
@@ -79,7 +81,7 @@ ENV APACHE_LOCK_DIR /var/lock/apache2
 RUN chmod 755 /root
 # mail
 COPY faxocr_procmailrc /tmp/procmailrc
-RUN sed 's/^M$//' /tmp/procmailrc > /etc/procmailrc
+RUN tr -d '\r' < /tmp/procmailrc > /etc/procmailrc
 RUN mkdir /root/Maildir
 # sheet-reader
 RUN cp /home/faxocr/src/kocr/databases/cnn-num.txt /home/faxocr/src/kocr/databases/cnn-alphabet_lowercase.txt
