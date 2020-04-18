@@ -82,6 +82,6 @@ COPY faxocr_procmailrc /tmp/procmailrc
 RUN sed 's/^M$//' /tmp/procmailrc > /etc/procmailrc
 RUN mkdir /root/Maildir
 # sheet-reader
-COPY /home/faxocr/src/kocr/database/cnn-num.txt /home/faxocr/src/kocr/database/cnn-alphabet_lowercase.txt
-COPY /home/faxocr/src/kocr/database/cnn-num.txt /home/faxocr/src/kocr/database/cnn-alphabet_uppercase.txt
-COPY /home/faxocr/src/kocr/database/cnn-num.txt /home/faxocr/src/kocr/database/cnn-alphabet_number.txt
+COPY /home/faxocr/src/kocr/databases/cnn-num.txt /home/faxocr/src/kocr/databases/cnn-alphabet_lowercase.txt
+COPY /home/faxocr/src/kocr/databases/cnn-num.txt /home/faxocr/src/kocr/databases/cnn-alphabet_uppercase.txt
+COPY /home/faxocr/src/kocr/databases/cnn-num.txt /home/faxocr/src/kocr/databases/cnn-alphabet_number.txt
