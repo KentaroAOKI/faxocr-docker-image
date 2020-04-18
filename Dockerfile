@@ -3,29 +3,35 @@ FROM ubuntu:16.04
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 # ubuntu packages
-RUN apt-get update
-RUN apt-get install -y git curl g++ make bzip2
-RUN apt-get install -y zlib1g-dev libssl-dev libreadline-dev
-RUN apt-get install -y libyaml-dev libxml2-dev libxslt-dev
-RUN apt-get install -y sqlite3 libsqlite3-dev nodejs
-RUN apt-get install -y wget libopencv-dev
-RUN apt-get install -y openssl build-essential imagemagick php libcurl4-openssl-dev
-RUN apt-get install -y wget libmysqlclient-dev
-RUN apt-get install -y libtool-bin wkhtmltopdf gocr netpbm fetchmail sendemail pdftk zip mpack xvfb procmail
-RUN apt-get install -y php-mbstring php-mysql
+RUN apt-get update && apt-get install -y \
+    build-essential libtool-bin git curl wget \
+    bzip2 zlib1g-dev \
+    openssl libssl-dev libcurl4-openssl-dev \
+    libreadline-dev libyaml-dev libxml2-dev libxslt-dev \
+    sqlite3 libsqlite3-dev \
+    libmysqlclient-dev \
+    nodejs
+RUN apt-get install -y --no-install-recommends \
+    libopencv-dev
+RUN apt-get install -y --no-install-recommends \
+    php php-mbstring php-mysql \
+    imagemagick wkhtmltopdf gocr netpbm fetchmail sendemail pdftk zip mpack xvfb procmail \
+    parallel fonts-takao-gothic fonts-takao-mincho
 COPY imagemagick_policy.xml /etc/ImageMagick-6/policy.xml
 # ruby
 ENV RUBY_DIR=/root/.rbenv
 ENV RUBY_VERSION=1.9.2-p330
 RUN git clone https://github.com/sstephenson/rbenv.git $RUBY_DIR
 ENV PATH=$RUBY_DIR/bin:$PATH
-RUN mkdir -p $RUBY_DIR/plugins && cd $RUBY_DIR/plugins && git clone https://github.com/sstephenson/ruby-build.git
+RUN mkdir -p $RUBY_DIR/plugins && cd $RUBY_DIR/plugins \
+    && git clone https://github.com/sstephenson/ruby-build.git
 RUN $RUBY_DIR/bin/rbenv install $RUBY_VERSION
 RUN echo "install: --no-ri --no-rdoc" > /root/.gemrc \
     && echo "update: --no-ri --no-rdoc" >> /root/.gemrc
 ENV PATH=$RUBY_DIR/versions/$RUBY_VERSION/bin:$PATH
 RUN $RUBY_DIR/versions/$RUBY_VERSION/bin/gem install bundler -v 1.11.2
 # faxocr
+RUN echo faxocr
 RUN useradd -d /home/faxocr faxocr
 RUN git clone -b kentaro/ruby19rails23mysql56 https://github.com/KentaroAOKI/faxocr.git /home/faxocr
 RUN cd /home/faxocr/rails && $RUBY_DIR/versions/$RUBY_VERSION/bin/bundle install
@@ -37,24 +43,26 @@ RUN cd /home/faxocr/src \
     && git clone https://github.com/cluscore/cluscore.git \
     && cd cluscore \
     && ./configure \
-    && make install
+    && make install \
+    && make clean
 RUN cd /home/faxocr/src/srhelper \
     && make \
     && make install
 RUN cd /home/faxocr/src \
     && git clone https://github.com/faxocr/kocr.git \
     && cd kocr/src \
-    && make \
     && make library \
-    && make install
+    && make install \
+    && make clean
 RUN cd /home/faxocr/src \
-    && git clone https://github.com/faxocr/sheet-reader.git \
+    && git clone -b feature/alphabet https://github.com/faxocr/sheet-reader.git \
     && cd sheet-reader \
     && ./configure \
     && make install \
-    && cp src/sheetreader ../../bin/
-# apache and passenger
-RUN apt-get install -y apache2 apache2-dev
+    && cp src/sheetreader ../../bin/ \
+    && make clean
+# apache and passenger (If you don't use it, you can safely delete it.)
+RUN apt-get install -y apache2 apache2-dev --no-install-recommends
 RUN $RUBY_DIR/versions/$RUBY_VERSION/bin/gem install passenger
 RUN $RUBY_DIR/versions/$RUBY_VERSION/bin/passenger-install-apache2-module --auto
 RUN $RUBY_DIR/versions/$RUBY_VERSION/bin/passenger-install-apache2-module --snippet > /etc/apache2/mods-available/passenger.load
@@ -73,3 +81,7 @@ RUN chmod 755 /root
 COPY faxocr_procmailrc /tmp/procmailrc
 RUN sed 's/^M$//' /tmp/procmailrc > /etc/procmailrc
 RUN mkdir /root/Maildir
+# sheet-reader
+COPY /home/faxocr/src/kocr/database/cnn-num.txt /home/faxocr/src/kocr/database/cnn-alphabet_lowercase.txt
+COPY /home/faxocr/src/kocr/database/cnn-num.txt /home/faxocr/src/kocr/database/cnn-alphabet_uppercase.txt
+COPY /home/faxocr/src/kocr/database/cnn-num.txt /home/faxocr/src/kocr/database/cnn-alphabet_number.txt
