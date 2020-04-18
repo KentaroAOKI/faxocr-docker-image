@@ -13,9 +13,10 @@ RUN apt-get update && apt-get install -y \
     nodejs
 RUN apt-get install -y --no-install-recommends \
     libopencv-dev
-RUN apt-get install -y \
-    php php-mbstring php-mysql --no-install-recommends \
-    imagemagick wkhtmltopdf gocr netpbm fetchmail sendemail pdftk zip mpack xvfb procmail \
+RUN apt-get install -y --no-install-recommends \
+    php php-mbstring php-mysql \
+    imagemagick wkhtmltopdf ghostscript gocr netpbm \
+    fetchmail sendemail pdftk zip mpack xvfb procmail \
     parallel fonts-takao-gothic fonts-takao-mincho ghostscript
 COPY imagemagick_policy.xml /etc/ImageMagick-6/policy.xml
 # ruby
@@ -31,7 +32,6 @@ RUN echo "install: --no-ri --no-rdoc" > /root/.gemrc \
 ENV PATH=$RUBY_DIR/versions/$RUBY_VERSION/bin:$PATH
 RUN $RUBY_DIR/versions/$RUBY_VERSION/bin/gem install bundler -v 1.11.2
 # faxocr
-RUN echo faxocr1
 RUN useradd -d /home/faxocr faxocr
 RUN git clone -b kentaro/ruby19rails23mysql56 https://github.com/KentaroAOKI/faxocr.git /home/faxocr
 RUN cd /home/faxocr/rails && $RUBY_DIR/versions/$RUBY_VERSION/bin/bundle install
