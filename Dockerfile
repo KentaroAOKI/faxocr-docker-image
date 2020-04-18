@@ -32,6 +32,7 @@ RUN echo "install: --no-ri --no-rdoc" > /root/.gemrc \
 ENV PATH=$RUBY_DIR/versions/$RUBY_VERSION/bin:$PATH
 RUN $RUBY_DIR/versions/$RUBY_VERSION/bin/gem install bundler -v 1.11.2
 # faxocr
+RUN echo faxocr
 RUN useradd -d /home/faxocr faxocr
 RUN git clone -b kentaro/ruby19rails23mysql56 https://github.com/KentaroAOKI/faxocr.git /home/faxocr
 RUN cd /home/faxocr/rails && $RUBY_DIR/versions/$RUBY_VERSION/bin/bundle install
@@ -50,6 +51,7 @@ RUN cd /home/faxocr/src/srhelper \
     && make install
 RUN cd /home/faxocr/src \
     && git clone https://github.com/faxocr/kocr.git \
+    && cd kocr && git fetch origin pull/3/head:replace_preprocessing && git checkout replace_preprocessing && cd .. \
     && cd kocr/src \
     && make library \
     && make install \
@@ -84,6 +86,6 @@ COPY faxocr_procmailrc /tmp/procmailrc
 RUN tr -d '\r' < /tmp/procmailrc > /etc/procmailrc
 RUN mkdir /root/Maildir
 # sheet-reader
-RUN cp /home/faxocr/src/kocr/databases/cnn-num.txt /home/faxocr/src/kocr/databases/cnn-alphabet_lowercase.txt
-RUN cp /home/faxocr/src/kocr/databases/cnn-num.txt /home/faxocr/src/kocr/databases/cnn-alphabet_uppercase.txt
-RUN cp /home/faxocr/src/kocr/databases/cnn-num.txt /home/faxocr/src/kocr/databases/cnn-alphabet_number.txt
+RUN cp /home/faxocr/src/kocr/databases/cnn-num.bin /home/faxocr/src/kocr/databases/cnn-alphabet_lowercase.bin
+RUN cp /home/faxocr/src/kocr/databases/cnn-num.bin /home/faxocr/src/kocr/databases/cnn-alphabet_uppercase.bin
+RUN cp /home/faxocr/src/kocr/databases/cnn-num.bin /home/faxocr/src/kocr/databases/cnn-alphabet_number.bin
